@@ -1,0 +1,24 @@
+{% extends 'proyectos/base.html' %}
+
+{% block title %}Inicio - Gestión TI{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Proyectos TI</h1>
+
+<div class="row">
+    {% for proyecto in proyectos %}
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ proyecto.nombre }}</h5>
+                <p class="card-text">{{ proyecto.descripcion|truncatechars:100 }}</p>
+                <p class="text-muted">Inicio: {{ proyecto.fecha_inicio }} | Estado: {{ proyecto.estado }}</p>
+                <a href="#" class="btn btn-primary">Ver Detalles</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>No hay proyectos disponibles.</p>
+    {% endfor %}
+</div>
+{% endblock %}
