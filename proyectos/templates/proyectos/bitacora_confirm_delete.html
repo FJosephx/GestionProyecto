@@ -1,0 +1,15 @@
+{% extends 'proyectos/base.html' %}
+
+{% block title %}Eliminar Bitácora{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Eliminar Registro de Bitácora</h1>
+
+<p>¿Estás seguro que quieres eliminar este registro del <strong>{{ bitacora.fecha }}</strong>?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+    <a href="{% url 'proyecto_detail' bitacora.proyecto.id %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

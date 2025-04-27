@@ -1,0 +1,80 @@
+{% extends 'proyectos/base.html' %}
+
+{% block title %}Detalles - {{ proyecto.nombre }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">{{ proyecto.nombre }}</h1>
+<div class="mb-4">
+    <a href="{% url 'proyecto_update' proyecto.id %}" class="btn btn-warning">Editar Proyecto</a>
+    <a href="{% url 'proyecto_delete' proyecto.id %}" class="btn btn-danger" onclick="confirmDelete(event, this.href)">Eliminar Proyecto</a>
+</div>
+
+<p><strong>Descripción:</strong> {{ proyecto.descripcion }}</p>
+<p><strong>Fecha de Inicio:</strong> {{ proyecto.fecha_inicio }}</p>
+<p><strong>Fecha de Fin:</strong> {{ proyecto.fecha_fin|default:"No definida" }}</p>
+<p><strong>Estado:</strong> {{ proyecto.estado }}</p>
+
+<hr>
+
+<h3>Tareas</h3>
+<a href="{% url 'tarea_create' proyecto.id %}" class="btn btn-primary mb-3">+ Nueva Tarea</a>
+{% if tareas %}
+<ul class="list-group mb-4">
+    {% for tarea in tareas %}
+    <li class="list-group-item">
+        <strong>{{ tarea.nombre }}</strong> - {{ tarea.estado }} (Prioridad: {{ tarea.prioridad }})
+        <div class="mt-2">
+            <a href="{% url 'tarea_update' tarea.id %}" class="btn btn-sm btn-warning">Editar</a>
+            <a href="{% url 'tarea_delete' tarea.id %}" class="btn btn-sm btn-danger" onclick="confirmDelete(event, this.href)">Eliminar</a>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No hay tareas registradas.</p>
+{% endif %}
+
+<hr>
+
+<h3>Bitácora de Avances</h3>
+<a href="{% url 'bitacora_create' proyecto.id %}" class="btn btn-info mb-3">+ Nueva Bitácora</a>
+{% if bitacoras %}
+<ul class="list-group">
+    {% for bitacora in bitacoras %}
+    <li class="list-group-item">
+        <strong>{{ bitacora.fecha }}:</strong> {{ bitacora.comentario }} (Avance: {{ bitacora.avance }}%)
+        <div class="mt-2">
+            <a href="{% url 'bitacora_update' bitacora.id %}" class="btn btn-sm btn-warning">Editar</a>
+            <a href="{% url 'bitacora_delete' bitacora.id %}" class="btn btn-sm btn-danger" onclick="confirmDelete(event, this.href)">Eliminar</a>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+<!-- Modal de Confirmación -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+        ¿Estás seguro de que deseas eliminar este elemento? Esta acción no se puede deshacer.
+        </div>
+        <div class="modal-footer">
+        <form id="deleteForm" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Eliminar</button>
+        </form>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+    </div>
+    </div>
+</div>
+
+{% else %}
+<p>No hay registros de bitácora aún.</p>
+{% endif %}
+
+<a href="/" class="btn btn-secondary mt-4">Volver al inicio</a>
+{% endblock %}

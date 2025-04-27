@@ -10,3 +10,24 @@ body {
 footer {
     font-size: 0.9rem;
 }
+
+.alert {
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+}
+
+.alert.fade-out {
+    opacity: 0;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    max-width: 300px; /* tamaño ideal */
+    margin: 0 auto;
+}
+
+canvas {
+    max-width: 100% !important;
+    height: auto !important;
+}
