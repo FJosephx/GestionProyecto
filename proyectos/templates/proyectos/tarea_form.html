@@ -1,0 +1,14 @@
+{% extends 'proyectos/base.html' %}
+
+{% block title %}Agregar Tarea{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Agregar Tarea al Proyecto "{{ proyecto.nombre }}"</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Guardar Tarea</button>
+    <a href="{% url 'proyecto_detail' proyecto.id %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}
