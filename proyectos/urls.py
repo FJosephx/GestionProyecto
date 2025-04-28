@@ -13,4 +13,5 @@ urlpatterns = [
     path('tarea/<int:tarea_id>/eliminar/', views.tarea_delete, name='tarea_delete'),
     path('bitacora/<int:bitacora_id>/editar/', views.bitacora_update, name='bitacora_update'),
     path('bitacora/<int:bitacora_id>/eliminar/', views.bitacora_delete, name='bitacora_delete'),
+    path('api/filtrar/', views.filtrar_datos, name='filtrar_datos'), 
 ]

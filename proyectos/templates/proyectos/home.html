@@ -5,6 +5,12 @@
 {% block content %}
 <h1 class="mb-4">Proyectos TI</h1>
 
+<form method="get" id="filtroForm" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="q" class="form-control" placeholder="Buscar proyectos..." value="{{ request.GET.q }}">
+        <button type="submit" class="btn btn-outline-primary">Buscar</button>
+    </div>
+</form>
 
 <a href="{% url 'proyecto_create' %}" class="btn btn-success mb-4">+ Nuevo Proyecto</a>
 
@@ -46,65 +52,31 @@
 <div class="row mb-4">
     <div class="col-md-6">
         <div class="card shadow-sm">
-            <div class="card-body chart-container">
-                <h5 class="card-title text-center">Tareas Completadas vs Pendientes</h5>
-                <canvas id="tareasChart"></canvas>
-            </div>            
+            <div class="card-body text-center">
+                <h5 class="card-title">Tareas Completadas vs Pendientes</h5>
+                <div class="chart-container">
+                    <canvas id="tareasChart"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="col-md-6">
         <div class="card shadow-sm">
-            <div class="card-body chart-container">
+            <div class="card-body text-center">
                 <h5 class="card-title">Proyectos Activos vs Finalizados</h5>
-                <canvas id="proyectosChart"></canvas>
-            </div>
+                <div class="chart-container">
+                    <canvas id="proyectosChart"></canvas>
+                </div>
+            </div>            
         </div>
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Gráfico de Tareas
-        var tareasCtx = document.getElementById('tareasChart').getContext('2d');
-        new Chart(tareasCtx, {
-            type: 'pie',
-            data: {
-                labels: ['Completadas', 'Pendientes'],
-                datasets: [{
-                    data: [{{ tareas_completadas }}, {{ tareas_pendientes }}],
-                    backgroundColor: ['#198754', '#ffc107'],
-                }]
-            },
-            options: {
-                responsive: true
-            }
-        });
-    
-        // Gráfico de Proyectos
-        var proyectosCtx = document.getElementById('proyectosChart').getContext('2d');
-        new Chart(proyectosCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Activos', 'Finalizados'],
-                datasets: [{
-                    label: 'Cantidad',
-                    data: [{{ proyectos_activos }}, {{ proyectos_finalizados }}],
-                    backgroundColor: ['#0d6efd', '#198754'],
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        precision:0
-                    }
-                }
-            }
-        });
-    });
-    </script>
+    window.chartDataTareas = [{{ tareas_completadas }}, {{ tareas_pendientes }}];
+    window.chartDataProyectos = [{{ proyectos_activos }}, {{ proyectos_finalizados }}];
+</script>
     
 
 <div class="row mb-4">
@@ -112,35 +84,16 @@
         <div class="card text-dark bg-light shadow-sm">
             <div class="card-body">
                 <h5 class="card-title">Avance Promedio General</h5>
-                <p class="card-text display-6">{{ avance_promedio }}%</p>
+                <p id="avancePromedioGeneral"  class="card-text display-6">{{ avance_promedio }}%</p>
             </div>
         </div>
     </div>
 </div>
 
-
-<form method="get" action="" class="mb-4">
-    <div class="input-group">
-        <input type="text" name="q" class="form-control" placeholder="Buscar proyectos..." value="{{ request.GET.q }}">
-        <button type="submit" class="btn btn-outline-primary">Buscar</button>
-    </div>
-</form>
-
-
-<div class="row">
-    {% for proyecto in proyectos %}
-    <div class="col-md-4 mb-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-body">
-                <h5 class="card-title">{{ proyecto.nombre }}</h5>
-                <p class="card-text">{{ proyecto.descripcion|truncatechars:100 }}</p>
-                <p class="text-muted">Inicio: {{ proyecto.fecha_inicio }} | Estado: {{ proyecto.estado }}</p>
-                <a href="{% url 'proyecto_detail' proyecto.id %}" class="btn btn-primary">Ver Detalles</a>
-            </div>
-        </div>
-    </div>
-    {% empty %}
-    <p>No hay proyectos disponibles.</p>
-    {% endfor %}
+<div id="proyectosContainer">
+    {% include 'proyectos/proyectos_list.html' %}
 </div>
+
+
+
 {% endblock %}

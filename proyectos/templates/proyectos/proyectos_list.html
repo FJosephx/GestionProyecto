@@ -1,0 +1,20 @@
+{% for proyecto in proyectos %}
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">{{ proyecto.nombre }}</h5>
+        <p class="card-text">{{ proyecto.descripcion }}</p>
+        <p class="card-text">
+            <small class="text-muted">
+                Inicio: {{ proyecto.fecha_inicio|date:"d/m/Y" }}
+                {% if proyecto.fecha_fin %}
+                - Fin: {{ proyecto.fecha_fin|date:"d/m/Y" }}
+                {% endif %}
+                | Estado: {{ proyecto.estado }}
+            </small>
+        </p>
+        <a href="{% url 'proyecto_detail' proyecto.id %}" class="btn btn-primary btn-sm">Ver Detalles</a>
+    </div>
+</div>
+{% empty %}
+<p class="text-center">No se encontraron proyectos con los filtros seleccionados.</p>
+{% endfor %}

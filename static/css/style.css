@@ -11,23 +11,16 @@ footer {
     font-size: 0.9rem;
 }
 
-.alert {
-    opacity: 1;
-    transition: opacity 0.5s ease-out;
-}
-
-.alert.fade-out {
-    opacity: 0;
-}
-
+/* Nuevo para los gráficos */
 .chart-container {
     position: relative;
     width: 100%;
-    max-width: 300px; /* tamaño ideal */
+    max-width: 350px;
     margin: 0 auto;
+    height: 200px;
 }
 
 canvas {
-    max-width: 100% !important;
-    height: auto !important;
+    width: 100% !important;
+    height: 100% !important;
 }

@@ -3,6 +3,8 @@ from .models import Proyecto, Tarea, Bitacora
 from .forms import ProyectoForm, TareaForm, BitacoraForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 
 # Vista de home
 @login_required
@@ -24,6 +26,7 @@ def home(request):
         avance_promedio = round(sum([b.avance for b in bitacoras]) / bitacoras.count(), 2)
     else:
         avance_promedio = 0
+
 
     context = {
         'proyectos': proyectos,
@@ -167,3 +170,49 @@ def bitacora_delete(request, bitacora_id):
         messages.success(request, 'Registro de bitácora eliminado correctamente.')
         return redirect('proyecto_detail', proyecto_id=proyecto_id)
     return render(request, 'proyectos/bitacora_confirm_delete.html', {'bitacora': bitacora})
+
+# Vista para filtrar datos
+@login_required
+def filtrar_datos(request):
+    if request.method == 'GET':
+        query = request.GET.get('q')
+        estado = request.GET.get('estado')
+        fecha_inicio = request.GET.get('fecha_inicio')
+
+        proyectos = Proyecto.objects.all()
+
+        if query:
+            proyectos = proyectos.filter(nombre__icontains=query)
+        if estado:
+            proyectos = proyectos.filter(estado=estado)
+        if fecha_inicio:
+            proyectos = proyectos.filter(fecha_inicio__gte=fecha_inicio)
+
+        proyectos_activos = proyectos.filter(estado='Activo').count()
+        proyectos_finalizados = proyectos.filter(estado='Finalizado').count()
+
+        tareas = Tarea.objects.filter(proyecto__in=proyectos)
+        tareas_totales = tareas.count()
+        tareas_completadas = tareas.filter(estado='Completada').count()
+        tareas_pendientes = tareas_totales - tareas_completadas
+
+        bitacoras = Bitacora.objects.filter(proyecto__in=proyectos)
+        if bitacoras.exists():
+            avance_promedio = round(sum([b.avance for b in bitacoras]) / bitacoras.count(), 2)
+        else:
+            avance_promedio = 0
+
+        proyectos_html = render_to_string('proyectos/proyectos_list.html', {'proyectos': proyectos})
+
+        data = {
+            'proyectos_activos': proyectos_activos,
+            'proyectos_finalizados': proyectos_finalizados,
+            'tareas_completadas': tareas_completadas,
+            'tareas_pendientes': tareas_pendientes,
+            'avance_promedio': avance_promedio,
+            'proyectos_html': proyectos_html,
+        }
+
+        return JsonResponse(data)
+    else:
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
