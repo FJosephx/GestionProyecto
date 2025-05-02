@@ -1,14 +1,137 @@
 {% extends 'proyectos/base.html' %}
 
-{% block title %}Agregar Bitácora{% endblock %}
+{% block title %}{{ bitacora.id|yesno:"Editar,Nuevo" }} Registro de Bitácora{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Agregar Bitácora al Proyecto "{{ proyecto.nombre }}"</h1>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-{{ bitacora.id|yesno:"edit,plus" }}-circle me-2"></i>
+                        {{ bitacora.id|yesno:"Editar,Nuevo" }} Registro de Bitácora
+                        {% if proyecto %}
+                        <small class="d-block mt-1">Proyecto: {{ proyecto.nombre }}</small>
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="id_fecha" class="form-label">Fecha</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </span>
+                                    <input type="text" class="form-control datepicker" id="id_fecha" name="fecha" 
+                                           value="{{ form.fecha.value|date:'Y-m-d'|default:'' }}" required>
+                                </div>
+                                {% if form.fecha.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.fecha.errors|join:", " }}
+                                </div>
+                                {% endif %}
+                            </div>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Guardar Bitácora</button>
-    <a href="{% url 'proyecto_detail' proyecto.id %}" class="btn btn-secondary">Cancelar</a>
-</form>
+                            <div class="col-md-6">
+                                <label for="id_avance" class="form-label">Porcentaje de Avance</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-percentage"></i>
+                                    </span>
+                                    <input type="number" class="form-control" id="id_avance" name="avance" 
+                                           value="{{ form.avance.value|default:'0' }}" min="0" max="100" required>
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                {% if form.avance.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.avance.errors|join:", " }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <label for="id_comentario" class="form-label">Comentario</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-comment"></i>
+                                    </span>
+                                    <textarea class="form-control" id="id_comentario" name="comentario" 
+                                              rows="4" required>{{ form.comentario.value|default:'' }}</textarea>
+                                </div>
+                                {% if form.comentario.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.comentario.errors|join:", " }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Autor</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                    <input type="text" class="form-control bg-light" 
+                                           value="{% if bitacora %}{{ bitacora.autor.get_full_name|default:bitacora.autor.username }}{% else %}{{ request.user.get_full_name|default:request.user.username }}{% endif %}" 
+                                           readonly disabled>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="{% url 'proyecto_detail' proyecto.id %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar datepicker
+    flatpickr(".datepicker", {
+        dateFormat: "Y-m-d",
+        locale: "es",
+        allowInput: true,
+        defaultDate: "today"
+    });
+
+    // Validación del formulario
+    const form = document.querySelector('.needs-validation');
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+
+    // Validación del porcentaje
+    const avanceInput = document.getElementById('id_avance');
+    avanceInput.addEventListener('input', function() {
+        const value = parseInt(this.value);
+        if (value < 0) this.value = 0;
+        if (value > 100) this.value = 100;
+    });
+});
+</script>
+{% endblock %}
 {% endblock %}

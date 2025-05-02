@@ -1,99 +1,180 @@
 {% extends 'proyectos/base.html' %}
+{% load static %}
 
 {% block title %}Inicio - Gestión TI{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Proyectos TI</h1>
-
-<form method="get" id="filtroForm" class="mb-4">
-    <div class="input-group">
-        <input type="text" name="q" class="form-control" placeholder="Buscar proyectos..." value="{{ request.GET.q }}">
-        <button type="submit" class="btn btn-outline-primary">Buscar</button>
+<div class="container py-4">
+    <!-- Hero Section -->
+    <div class="row align-items-center mb-5">
+            <h1 class="display-4 fw-bold mb-3">Gestión de Proyectos TI</h1>
+            <p class="lead fs-4 text-muted mb-4">Sistema integral para la gestión y seguimiento de proyectos y tareas del departamento de TI.</p>
+            <div class="d-flex gap-3">
+                <a href="{% url 'proyecto_create' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus-circle me-2"></i>Nuevo Proyecto
+                </a>
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-chart-line me-2"></i>Dashboard
+                </a>
+            </div>
     </div>
-</form>
 
-<a href="{% url 'proyecto_create' %}" class="btn btn-success mb-4">+ Nuevo Proyecto</a>
-
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card text-white bg-primary shadow-sm">
-            <div class="card-body">
-                <h5 class="card-title">Proyectos Activos</h5>
-                <p class="card-text display-6">{{ proyectos_activos }}</p>
+    <!-- Estadísticas -->
+    <div class="row g-4 mb-5">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Proyectos Activos</h6>
+                            <h2 class="mb-0">{{ proyectos_activos }}</h2>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-success shadow-sm">
-            <div class="card-body">
-                <h5 class="card-title">Proyectos Finalizados</h5>
-                <p class="card-text display-6">{{ proyectos_finalizados }}</p>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Proyectos Finalizados</h6>
+                            <h2 class="mb-0">{{ proyectos_finalizados }}</h2>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-info shadow-sm">
-            <div class="card-body">
-                <h5 class="card-title">Tareas Totales</h5>
-                <p class="card-text display-6">{{ tareas_totales }}</p>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Tareas Totales</h6>
+                            <h2 class="mb-0">{{ tareas_totales }}</h2>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-warning shadow-sm">
-            <div class="card-body">
-                <h5 class="card-title">Tareas Completadas</h5>
-                <p class="card-text display-6">{{ tareas_completadas }}</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-body text-center">
-                <h5 class="card-title">Tareas Completadas vs Pendientes</h5>
-                <div class="chart-container">
-                    <canvas id="tareasChart"></canvas>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Avance Promedio</h6>
+                            <h2 class="mb-0">{{ avance_promedio }}%</h2>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-body text-center">
-                <h5 class="card-title">Proyectos Activos vs Finalizados</h5>
-                <div class="chart-container">
-                    <canvas id="proyectosChart"></canvas>
+    <!-- Proyectos Recientes -->
+    <div class="card shadow-sm mb-5">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>Proyectos Recientes
+                </h5>
+                <a href="{% url 'proyectos_list' %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-list me-2"></i>Ver Todos
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                {% for proyecto in proyectos|slice:":3" %}
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title mb-0">{{ proyecto.nombre }}</h5>
+                                <span class="badge {% if proyecto.estado == 'Activo' %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ proyecto.estado }}
+                                </span>
+                            </div>
+                            <p class="card-text text-muted">{{ proyecto.descripcion|truncatechars:100 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ proyecto.fecha_inicio|date:"d/m/Y" }}
+                                </small>
+                                <a href="{% url 'proyecto_detail' proyecto.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye me-1"></i>Ver Detalles
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>            
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle me-2"></i>No hay proyectos disponibles.
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    window.chartDataTareas = [{{ tareas_completadas }}, {{ tareas_pendientes }}];
-    window.chartDataProyectos = [{{ proyectos_activos }}, {{ proyectos_finalizados }}];
-</script>
-    
-
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="card text-dark bg-light shadow-sm">
-            <div class="card-body">
-                <h5 class="card-title">Avance Promedio General</h5>
-                <p id="avancePromedioGeneral"  class="card-text display-6">{{ avance_promedio }}%</p>
+    <!-- Enlaces Rápidos -->
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm text-center">
+                <div class="card-body">
+                    <div class="display-4 text-primary mb-3">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h5 class="card-title">Dashboard</h5>
+                    <p class="card-text text-muted">Visualiza estadísticas y métricas de tus proyectos en tiempo real.</p>
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-chart-bar me-2"></i>Ver Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm text-center">
+                <div class="card-body">
+                    <div class="display-4 text-success mb-3">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h5 class="card-title">Gestión de Tareas</h5>
+                    <p class="card-text text-muted">Administra y da seguimiento a las tareas de tus proyectos.</p>
+                    <a href="{% url 'proyectos_list' %}" class="btn btn-outline-success">
+                        <i class="fas fa-tasks me-2"></i>Ver Proyectos
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm text-center">
+                <div class="card-body">
+                    <div class="display-4 text-info mb-3">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h5 class="card-title">Bitácoras</h5>
+                    <p class="card-text text-muted">Registra y consulta el avance y las actividades de los proyectos.</p>
+                    <a href="{% url 'proyectos_list' %}" class="btn btn-outline-info">
+                        <i class="fas fa-list me-2"></i>Ver Proyectos
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-<div id="proyectosContainer">
-    {% include 'proyectos/proyectos_list.html' %}
-</div>
-
-
-
 {% endblock %}

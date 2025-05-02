@@ -11,16 +11,58 @@ footer {
     font-size: 0.9rem;
 }
 
-/* Nuevo para los gráficos */
+/* Estilos para los gráficos */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
 .chart-container {
     position: relative;
     width: 100%;
-    max-width: 350px;
+    height: 300px;
     margin: 0 auto;
-    height: 200px;
+    padding: 10px;
 }
 
 canvas {
-    width: 100% !important;
-    height: 100% !important;
+    max-width: 100%;
+    height: auto !important;
+}
+
+/* Estilos para las tarjetas de estadísticas */
+.card.bg-primary, .card.bg-success, .card.bg-warning, .card.bg-danger {
+    transition: transform 0.3s ease;
+}
+
+.card.bg-primary:hover, .card.bg-success:hover, .card.bg-warning:hover, .card.bg-danger:hover {
+    transform: translateY(-5px);
+}
+
+.display-4 i {
+    opacity: 0.8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .chart-container {
+        height: 250px;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
 }

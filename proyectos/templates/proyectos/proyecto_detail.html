@@ -1,80 +1,277 @@
 {% extends 'proyectos/base.html' %}
 
-{% block title %}Detalles - {{ proyecto.nombre }}{% endblock %}
+{% block title %}{{ proyecto.nombre }}{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">{{ proyecto.nombre }}</h1>
-<div class="mb-4">
-    <a href="{% url 'proyecto_update' proyecto.id %}" class="btn btn-warning">Editar Proyecto</a>
-    <a href="{% url 'proyecto_delete' proyecto.id %}" class="btn btn-danger" onclick="confirmDelete(event, this.href)">Eliminar Proyecto</a>
-</div>
-
-<p><strong>Descripción:</strong> {{ proyecto.descripcion }}</p>
-<p><strong>Fecha de Inicio:</strong> {{ proyecto.fecha_inicio }}</p>
-<p><strong>Fecha de Fin:</strong> {{ proyecto.fecha_fin|default:"No definida" }}</p>
-<p><strong>Estado:</strong> {{ proyecto.estado }}</p>
-
-<hr>
-
-<h3>Tareas</h3>
-<a href="{% url 'tarea_create' proyecto.id %}" class="btn btn-primary mb-3">+ Nueva Tarea</a>
-{% if tareas %}
-<ul class="list-group mb-4">
-    {% for tarea in tareas %}
-    <li class="list-group-item">
-        <strong>{{ tarea.nombre }}</strong> - {{ tarea.estado }} (Prioridad: {{ tarea.prioridad }})
-        <div class="mt-2">
-            <a href="{% url 'tarea_update' tarea.id %}" class="btn btn-sm btn-warning">Editar</a>
-            <a href="{% url 'tarea_delete' tarea.id %}" class="btn btn-sm btn-danger" onclick="confirmDelete(event, this.href)">Eliminar</a>
+<div class="container py-4">
+    <!-- Encabezado del Proyecto -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="d-flex align-items-center mb-3">
+                        <h1 class="h2 mb-0 me-3">{{ proyecto.nombre }}</h1>
+                        <span class="badge {% if proyecto.estado == 'Activo' %}bg-success{% elif proyecto.estado == 'Finalizado' %}bg-secondary{% else %}bg-warning{% endif %} fs-6">
+                            {{ proyecto.estado }}
+                        </span>
+                    </div>
+                    <p class="lead text-muted mb-0">{{ proyecto.descripcion }}</p>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                    <div class="btn-group">
+                        <a href="{% url 'proyecto_update' proyecto.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-edit me-2"></i>Editar Proyecto
+                        </a>
+                        <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="visually-hidden">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item text-danger" href="{% url 'proyecto_delete' proyecto.id %}">
+                                    <i class="fas fa-trash-alt me-2"></i>Eliminar Proyecto
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
-    </li>
-    {% endfor %}
-</ul>
-{% else %}
-<p>No hay tareas registradas.</p>
-{% endif %}
-
-<hr>
-
-<h3>Bitácora de Avances</h3>
-<a href="{% url 'bitacora_create' proyecto.id %}" class="btn btn-info mb-3">+ Nueva Bitácora</a>
-{% if bitacoras %}
-<ul class="list-group">
-    {% for bitacora in bitacoras %}
-    <li class="list-group-item">
-        <strong>{{ bitacora.fecha }}:</strong> {{ bitacora.comentario }} (Avance: {{ bitacora.avance }}%)
-        <div class="mt-2">
-            <a href="{% url 'bitacora_update' bitacora.id %}" class="btn btn-sm btn-warning">Editar</a>
-            <a href="{% url 'bitacora_delete' bitacora.id %}" class="btn btn-sm btn-danger" onclick="confirmDelete(event, this.href)">Eliminar</a>
-        </div>
-    </li>
-    {% endfor %}
-</ul>
-<!-- Modal de Confirmación -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-    <div class="modal-content">
-        <div class="modal-header">
-        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-        </div>
-        <div class="modal-body">
-        ¿Estás seguro de que deseas eliminar este elemento? Esta acción no se puede deshacer.
-        </div>
-        <div class="modal-footer">
-        <form id="deleteForm" method="post">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Eliminar</button>
-        </form>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <div class="card-footer bg-light">
+            <div class="row text-center">
+                <div class="col-sm-4">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="fas fa-calendar-alt text-primary me-2"></i>
+                        <span>Inicio: {{ proyecto.fecha_inicio|date:"d/m/Y" }}</span>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="fas fa-calendar-check text-success me-2"></i>
+                        <span>Fin: {{ proyecto.fecha_fin|date:"d/m/Y"|default:"No definido" }}</span>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <i class="fas fa-tasks text-info me-2"></i>
+                        <span>{{ tareas.count }} Tareas</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Tareas -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-tasks me-2"></i>Tareas
+                </h5>
+                <a href="{% url 'tarea_create' proyecto.id %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-2"></i>Nueva Tarea
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if tareas %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Estado</th>
+                            <th>Prioridad</th>
+                            <th>Asignado a</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tarea in tareas %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-clipboard-list text-primary me-2"></i>
+                                    {{ tarea.nombre }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge {% if tarea.estado == 'Completada' %}bg-success{% elif tarea.estado == 'En Progreso' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                    {{ tarea.estado }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% for i in "12345"|make_list %}
+                                    <i class="fas fa-star {% if forloop.counter <= tarea.prioridad %}text-warning{% else %}text-muted{% endif %} me-1"></i>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user text-info me-2"></i>
+                                    {{ tarea.asignado_a }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'tarea_update' tarea.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'tarea_delete' tarea.id %}" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <div class="display-1 text-muted mb-3">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <h5 class="text-muted">No hay tareas registradas</h5>
+                <p class="mb-3">Comienza agregando una nueva tarea al proyecto.</p>
+                <a href="{% url 'tarea_create' proyecto.id %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Agregar Tarea
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Bitácora -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-book me-2"></i>Bitácora de Avances
+                </h5>
+                <a href="{% url 'bitacora_create' proyecto.id %}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-2"></i>Nuevo Registro
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if bitacoras %}
+            <div class="timeline">
+                {% for bitacora in bitacoras %}
+                <div class="timeline-item">
+                    <div class="timeline-marker bg-primary"></div>
+                    <div class="timeline-content">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">{{ bitacora.fecha|date:"d/m/Y" }}</h6>
+                            <div class="btn-group">
+                                <a href="{% url 'bitacora_update' bitacora.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'bitacora_delete' bitacora.id %}" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <p class="mb-2">{{ bitacora.comentario }}</p>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ bitacora.avance }}%"></div>
+                        </div>
+                        <small class="text-muted">Avance: {{ bitacora.avance }}%</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <div class="display-1 text-muted mb-3">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h5 class="text-muted">No hay registros en la bitácora</h5>
+                <p class="mb-3">Comienza registrando el avance del proyecto.</p>
+                <a href="{% url 'bitacora_create' proyecto.id %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Agregar Registro
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'home' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver al Inicio
+        </a>
     </div>
 </div>
 
-{% else %}
-<p>No hay registros de bitácora aún.</p>
-{% endif %}
+<style>
+.timeline {
+    position: relative;
+    padding: 1rem 0;
+}
 
-<a href="/" class="btn btn-secondary mt-4">Volver al inicio</a>
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 3rem;
+    padding-bottom: 2rem;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #007bff;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.25rem;
+}
+
+@media (min-width: 768px) {
+    .timeline::before {
+        left: 50%;
+        margin-left: -1px;
+    }
+
+    .timeline-item {
+        padding-left: 0;
+        padding-right: 0;
+        width: 50%;
+    }
+
+    .timeline-item:nth-child(odd) {
+        padding-right: 3rem;
+        text-align: right;
+    }
+
+    .timeline-item:nth-child(even) {
+        margin-left: 50%;
+        padding-left: 3rem;
+    }
+
+    .timeline-marker {
+        left: auto;
+        right: -8px;
+    }
+
+    .timeline-item:nth-child(even) .timeline-marker {
+        right: auto;
+        left: -8px;
+    }
+}
+</style>
 {% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'proyectos/base.html' %}
+
+{% block title %}Mi Perfil{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Mi Perfil</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="text-center mb-4">
+                            <img src="{{ user.profile.image.url }}" alt="Foto de perfil" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                            <div class="form-group">
+                                <label for="id_image" class="form-label">Cambiar foto de perfil</label>
+                                <input type="file" class="form-control" id="id_image" name="image" accept="image/*">
+                            </div>
+                            {% if user.profile.image.name != 'perfiles/default-avatar.png' %}
+                            <div class="mt-2">
+                                <button type="submit" name="delete_image" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i> Eliminar foto
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="id_username" class="form-label">Nombre de usuario</label>
+                            <input type="text" class="form-control" id="id_username" value="{{ user.username }}" disabled>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="id_email" class="form-label">Correo electrónico</label>
+                            <input type="email" class="form-control" id="id_email" name="email" value="{{ user.email }}">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="id_first_name" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="id_first_name" name="first_name" value="{{ user.first_name }}">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="id_last_name" class="form-label">Apellido</label>
+                            <input type="text" class="form-control" id="id_last_name" name="last_name" value="{{ user.last_name }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
