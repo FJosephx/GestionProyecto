@@ -1,14 +1,145 @@
 {% extends 'proyectos/base.html' %}
 
-{% block title %}Agregar Tarea{% endblock %}
+{% block title %}{{ tarea.id|yesno:"Editar,Nueva" }} Tarea{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Agregar Tarea al Proyecto "{{ proyecto.nombre }}"</h1>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-{{ tarea.id|yesno:"edit,plus" }}-circle me-2"></i>
+                        {{ tarea.id|yesno:"Editar,Nueva" }} Tarea
+                        {% if proyecto %}
+                        <small class="d-block mt-1">Proyecto: {{ proyecto.nombre }}</small>
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="id_nombre" class="form-label">Nombre de la Tarea</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-tasks"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="id_nombre" name="nombre" 
+                                           value="{{ form.nombre.value|default:'' }}" required>
+                                </div>
+                                {% if form.nombre.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.nombre.errors|join:", " }}
+                                </div>
+                                {% endif %}
+                            </div>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Guardar Tarea</button>
-    <a href="{% url 'proyecto_detail' proyecto.id %}" class="btn btn-secondary">Cancelar</a>
-</form>
+                            <div class="col-12">
+                                <label for="id_descripcion" class="form-label">Descripción</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-align-left"></i>
+                                    </span>
+                                    <textarea class="form-control" id="id_descripcion" name="descripcion" 
+                                              rows="4" required>{{ form.descripcion.value|default:'' }}</textarea>
+                                </div>
+                                {% if form.descripcion.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.descripcion.errors|join:", " }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="id_estado" class="form-label">Estado</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-flag"></i>
+                                    </span>
+                                    <select class="form-select" id="id_estado" name="estado" required>
+                                        <option value="">Seleccione un estado...</option>
+                                        <option value="Pendiente" {% if form.estado.value == 'Pendiente' %}selected{% endif %}>Pendiente</option>
+                                        <option value="En Progreso" {% if form.estado.value == 'En Progreso' %}selected{% endif %}>En Progreso</option>
+                                        <option value="Completada" {% if form.estado.value == 'Completada' %}selected{% endif %}>Completada</option>
+                                    </select>
+                                </div>
+                                {% if form.estado.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.estado.errors|join:", " }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="id_prioridad" class="form-label">Prioridad</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                    </span>
+                                    <input type="number" class="form-control" id="id_prioridad" name="prioridad" 
+                                           value="{{ form.prioridad.value|default:'1' }}" min="1" max="5" required>
+                                </div>
+                                <small class="text-muted">1 (Baja) - 5 (Alta)</small>
+                                {% if form.prioridad.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.prioridad.errors|join:", " }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-12">
+                                <label for="id_asignado_a" class="form-label">Asignado a</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                    <select class="form-select" id="id_asignado_a" name="asignado_a" required>
+                                        <option value="">Seleccione un usuario...</option>
+                                        {% for user in form.asignado_a.field.queryset %}
+                                            <option value="{{ user.id }}" {% if form.asignado_a.value == user.id %}selected{% endif %}>
+                                                {{ user.first_name }} {{ user.last_name }} ({{ user.username }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                {% if form.asignado_a.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.asignado_a.errors|join:", " }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="{% url 'proyecto_detail' proyecto.id %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Guardar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validación del formulario
+    const form = document.querySelector('.needs-validation');
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+});
+</script>
+{% endblock %}
 {% endblock %}

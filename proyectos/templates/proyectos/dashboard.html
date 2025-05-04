@@ -1,0 +1,301 @@
+{% extends 'proyectos/base.html' %}
+{% load static %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mb-4">Dashboard</h1>
+    
+    <!-- Resumen General -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Total Proyectos</h6>
+                            <h2 class="mb-0">{{ total_proyectos }}</h2>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span>{{ porcentaje_completado }}% completado</span>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Tareas Completadas</h6>
+                            <h2 class="mb-0">{{ tareas_completadas }}</h2>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span>De {{ total_tareas }} tareas totales</span>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">En Progreso</h6>
+                            <h2 class="mb-0">{{ tareas_en_progreso }}</h2>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span>Tareas activas</span>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-danger text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Pendientes</h6>
+                            <h2 class="mb-0">{{ tareas_pendientes }}</h2>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-list"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span>Tareas por iniciar</span>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row g-4">
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-pie me-1"></i>
+                    Estado de Proyectos
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="proyectosChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Distribución de Tareas por Prioridad
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="prioridadesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-chart-line me-1"></i>
+                    Progreso Mensual
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="progresoChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-users me-1"></i>
+                    Top 5 Asignaciones
+                </div>
+                <div class="card-body">
+                    <div style="position: relative; height: 300px;">
+                        <canvas id="asignacionesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Chart.js desde CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<script>
+    console.log('Iniciando script del dashboard...');
+
+    // Verificar que Chart.js está cargado
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js no está cargado correctamente');
+    } else {
+        console.log('Chart.js está cargado correctamente');
+    }
+
+    // Imprimir los datos recibidos
+    console.log('Datos de proyectos:', {{ proyectos|safe }});
+    console.log('Datos de prioridades:', {{ prioridades|safe }});
+    console.log('Datos de progreso:', {{ progreso|safe }});
+    console.log('Datos de asignaciones:', {{ asignaciones|safe }});
+
+    // Función para crear los gráficos
+    function createCharts() {
+        try {
+            // Verificar que los elementos canvas existen
+            const canvasProyectos = document.getElementById('proyectosChart');
+            const canvasPrioridades = document.getElementById('prioridadesChart');
+            const canvasProgreso = document.getElementById('progresoChart');
+            const canvasAsignaciones = document.getElementById('asignacionesChart');
+
+            if (!canvasProyectos || !canvasPrioridades || !canvasProgreso || !canvasAsignaciones) {
+                console.error('No se encontraron todos los elementos canvas necesarios');
+                return;
+            }
+
+            // Configuración común
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false
+            };
+
+            // Crear gráfico de proyectos
+            const proyectosData = JSON.parse('{{ proyectos|safe }}');
+            console.log('Creando gráfico de proyectos con datos:', proyectosData);
+            new Chart(canvasProyectos, {
+                type: 'doughnut',
+                data: {
+                    labels: proyectosData.labels,
+                    datasets: [{
+                        data: proyectosData.data,
+                        backgroundColor: proyectosData.colors
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Crear gráfico de prioridades
+            const prioridadesData = JSON.parse('{{ prioridades|safe }}');
+            console.log('Creando gráfico de prioridades con datos:', prioridadesData);
+            new Chart(canvasPrioridades, {
+                type: 'bar',
+                data: {
+                    labels: prioridadesData.labels,
+                    datasets: [{
+                        label: 'Tareas',
+                        data: prioridadesData.data,
+                        backgroundColor: prioridadesData.colors
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Crear gráfico de progreso
+            const progresoData = JSON.parse('{{ progreso|safe }}');
+            console.log('Creando gráfico de progreso con datos:', progresoData);
+            new Chart(canvasProgreso, {
+                type: 'line',
+                data: {
+                    labels: progresoData.labels,
+                    datasets: [{
+                        label: 'Progreso (%)',
+                        data: progresoData.data,
+                        borderColor: '#0d6efd',
+                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Crear gráfico de asignaciones
+            const asignacionesData = JSON.parse('{{ asignaciones|safe }}');
+            console.log('Creando gráfico de asignaciones con datos:', asignacionesData);
+            new Chart(canvasAsignaciones, {
+                type: 'bar',
+                data: {
+                    labels: asignacionesData.labels,
+                    datasets: [{
+                        label: 'Tareas asignadas',
+                        data: asignacionesData.data,
+                        backgroundColor: asignacionesData.colors
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+
+            console.log('Todos los gráficos creados exitosamente');
+        } catch (error) {
+            console.error('Error al crear los gráficos:', error);
+        }
+    }
+
+    // Esperar a que el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM cargado, iniciando creación de gráficos...');
+        createCharts();
+    });
+</script>
+{% endblock %}
